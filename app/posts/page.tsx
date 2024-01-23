@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import React from 'react'
-
+import prisma from '@/lib/prisma';
 async function getData() {
   const res = await fetch("https://dummyjson.com/posts")
 
@@ -10,8 +10,25 @@ async function getData() {
   return res.json()
 }
 
+async function getDataFromDb() {
+  const feed = await prisma.post.findMany({
+    where: { published: true },
+    include: {
+      author: {
+        select: { name: true },
+      },
+    },
+  });
+
+  return feed;
+}
+
 export default async function page() {
   const data = await getData();
+
+  const dbData = await getDataFromDb()
+  console.log("dbData", dbData)
+
   // console.log("data", data)
   return (
     <div>
